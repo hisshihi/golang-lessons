@@ -2,40 +2,33 @@ package main
 
 import (
 	"fmt"
-	"math"
-)
-
-const inflationRate = 2.5 // Уровень инфляций
-var (
-	investmentAmount   float64 = 1000.0 // Сумма инвестиций
-	expectedReturnRate float64 = 5.5 // Ожидаемая доходность
-	years              float64 = 10.0 // Кол-во лет
 )
 
 func main() {
-	askAQuestion()
+	revenue := getUserInput("Доход: ")
+	expenses := getUserInput("Расходы: ")
+	taxRate := getUserInput("Налоговая ставка: ")
 
-	futureValue, futureRealValue := calculateFutureValue()
+	ebt, profit, ratio := calculateFinancials(revenue, expenses, taxRate)
 
-	formattedFV := fmt.Sprintf("Future value %.1f\n", futureValue)
-	formattedRFV := fmt.Sprintf("Future value (adjusted for Inflation): %.1f\n", futureRealValue)
-
-	fmt.Print(formattedFV, formattedRFV)
+	fmt.Println(ebt)
+	fmt.Println(profit)
+	fmt.Printf("Ratio: %.2f\n", ratio)
 }
 
-func calculateFutureValue() (fv, frv float64) {
-	fv = investmentAmount * math.Pow(1+expectedReturnRate/100, years)
-	frv = fv / math.Pow(1+inflationRate/100, years)
+func calculateFinancials(revenue, expenses, taxRate float64) (ebt float64, profit float64, ratio float64) {
+	ebt = revenue - expenses
+	profit = ebt * (1 - taxRate / 100)
+	ratio = ebt / profit
+
 	return
 }
 
-func askAQuestion() {
-	fmt.Print("Введите сумму инвестиций: ")
-	fmt.Scan(&investmentAmount)
+func getUserInput(infoText string) float64 {
+	var userInput float64
 
-	fmt.Print("Ввидите ожидаемую доходность: ")
-	fmt.Scan(&expectedReturnRate)
+	fmt.Print(infoText)
+	fmt.Scan(&userInput)
 
-	fmt.Print("Ввиде кол-во лет: ")
-	fmt.Scan(&years)
+	return userInput
 }
