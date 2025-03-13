@@ -57,8 +57,12 @@ func userChoice(choice int) {
 	case 3:
 		fmt.Print("Сколько вы хотите снять? ")
 		fmt.Scan(&cash)
-		userBalance -= cash
-		p.Printf("Ваш баланс: %.2f\n", userBalance)
+		if userBalance > cash {
+			userBalance -= cash
+			p.Printf("Ваш баланс: %.2f\n", userBalance)
+		} else {
+			fmt.Println("Недостаточно средств")
+		}
 	default:
 		fmt.Println("Неверный ввод")
 	}
