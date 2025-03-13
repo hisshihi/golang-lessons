@@ -59,7 +59,7 @@ func writeOperationToFile(operation string, cash string, balance string) {
 
 	// Записываем новую операцию в файл
 	if _, err := file.WriteString(userOperation); err != nil {
-		panic(err)
+		fmt.Println("Не удалось записать в файл", err)
 	}
 }
 
