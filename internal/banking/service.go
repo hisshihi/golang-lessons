@@ -13,7 +13,23 @@ var (
 	min         float64 = 0.00
 	max         float64 = 100000.00
 	userBalance         = min + rand.Float64()*(max-min)
+	questions   string  = "1. Проверить баланс\n2. Внести наличные\n3. Снять наличные\n4. Выйти\n5. История операций\n\n"
 )
+
+func StartApp() {
+	var choice int
+	for {
+		fmt.Println(questions)
+		fmt.Print("Выберите вариант из предложенных: ")
+		fmt.Scan(&choice)
+
+		if choice == 4 {
+			fmt.Println("До свидания!")
+			break
+		}
+		UserChoice(choice)
+	}
+}
 
 func UserChoice(choice int) {
 	var cash float64
@@ -52,3 +68,4 @@ func UserChoice(choice int) {
 		fmt.Println("Неверный ввод")
 	}
 }
+
