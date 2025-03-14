@@ -1,2 +1,5 @@
 .vscode
 .env
+vendor
+.DS_Store
+

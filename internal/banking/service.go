@@ -28,9 +28,7 @@ func UserChoice(choice int) {
 		if cash <= 0 {
 			fmt.Println("Неверная сумма для пополнения")
 		} else {
-			userBalance += cash
-			p.Printf("Ваш баланс: %.2f₽\n", userBalance)
-			storage.WriteOperationToFile("Пополнение счёта -> ", p.Sprintf("%.2f₽", cash), p.Sprintf("Текущий баланс -> %.2f₽", userBalance))
+			Deposit(cash, userBalance)
 		}
 	case 3:
 		fmt.Print("Сколько вы хотите снять? ")
@@ -38,9 +36,7 @@ func UserChoice(choice int) {
 		if cash <= 0 {
 			fmt.Println("Неверная сумма для снятия")
 		} else if userBalance >= cash {
-			userBalance -= cash
-			p.Printf("Ваш баланс: %.2f₽\n", userBalance)
-			storage.WriteOperationToFile("Снятие со счёта -> ", p.Sprintf("%.2f₽", cash), p.Sprintf("Текущий баланс -> %.2f₽", userBalance))
+			Withdraw(cash, userBalance)
 		} else {
 			fmt.Println("Недостаточно средств")
 		}
