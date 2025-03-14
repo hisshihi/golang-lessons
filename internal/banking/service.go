@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"math/rand/v2"
 
-	"github.com/hisshihi/bank/internal/storage"
+	"github.com/hisshihi/golang-lessons/internal/storage"
 	"golang.org/x/text/language"
 	"golang.org/x/text/message"
 )

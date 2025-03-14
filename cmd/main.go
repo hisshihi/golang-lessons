@@ -1,8 +1,8 @@
 package main
 
 import (
-	"github.com/hisshihi/bank/internal/banking"
-	"github.com/hisshihi/bank/pkg/utils"
+	"github.com/hisshihi/golang-lessons/internal/banking"
+	"github.com/hisshihi/golang-lessons/pkg/utils"
 )
 
 func main() {
