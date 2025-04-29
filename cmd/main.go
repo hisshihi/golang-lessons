@@ -13,6 +13,17 @@ type user struct {
 	createdAt time.Time
 }
 
+func newUser(firstName, lastName, birthDate string) *user {
+	id := 0
+	return &user{
+		id:        id + 1,
+		firstName: firstName,
+		lastName:  lastName,
+		birthDate: birthDate,
+		createdAt: time.Now(),
+	}
+}
+
 func main() {
 	fmt.Println("Welcome to the User Management System")
 	var appUser *user
@@ -25,12 +36,11 @@ func main() {
 
 		switch choice {
 		case 1:
-			appUser = &user{
-				firstName: getUserString("Enter first name:"),
-				lastName:  getUserString("Enter last name:"),
-				birthDate: getUserString("Enter birth date (DD.MM.YYYY):"),
-				createdAt: time.Now(),
-			}
+			firstName := getUserString("Enter first name:")
+			lastName := getUserString("Enter last name:")
+			birthDate := getUserString("Enter birth date (DD.MM.YYYY):")
+			appUser = newUser(firstName, lastName, birthDate)
+
 			appUser.saveUser()
 		case 2:
 			fmt.Println("Enter first name to get user details:")
