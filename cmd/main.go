@@ -21,7 +21,7 @@ func main() {
 			firstName := userInput("Enter first name:")
 			lastName := userInput("Enter last name:")
 			birthDate := userInput("Enter birth date (DD.MM.YYYY):")
-			appUser, err := user.NewUser(firstName, lastName, birthDate)
+			appUser, err := user.New(firstName, lastName, birthDate)
 			if err != nil {
 				fmt.Println("Error creating user:", err)
 			}
