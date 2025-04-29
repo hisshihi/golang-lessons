@@ -18,9 +18,9 @@ func main() {
 
 		switch choice {
 		case 1:
-			firstName := getUserString("Enter first name:")
-			lastName := getUserString("Enter last name:")
-			birthDate := getUserString("Enter birth date (DD.MM.YYYY):")
+			firstName := userInput("Enter first name:")
+			lastName := userInput("Enter last name:")
+			birthDate := userInput("Enter birth date (DD.MM.YYYY):")
 			appUser, err := user.NewUser(firstName, lastName, birthDate)
 			if err != nil {
 				fmt.Println("Error creating user:", err)
@@ -40,7 +40,7 @@ func main() {
 	}
 }
 
-func getUserString(promt string) string {
+func userInput(promt string) string {
 	fmt.Println(promt)
 	var input string
 	fmt.Scanln(&input)
