@@ -1,8 +1,14 @@
 package user
 
-import "fmt"
+import (
+	"fmt"
+)
 
 var database = make(map[string]User)
+
+func (u *User) SaveAdmin() {
+	database[u.firstName] = *u
+}
 
 // Receiver
 func (u *User) SaveUser() {

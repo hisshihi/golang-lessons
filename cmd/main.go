@@ -9,6 +9,14 @@ import (
 func main() {
 	fmt.Println("Welcome to the User Management System")
 	var appUser user.User
+
+	admin, err := user.NewAdmin("admin@example.com", "admin")
+	if err != nil {
+		fmt.Println("Error creating admin:", err)
+	}
+
+	admin.User.SaveAdmin()
+
 	for {
 		fmt.Println("1. Add User")
 		fmt.Println("2. Get User")
