@@ -19,6 +19,10 @@ type outputtable interface {
 }
 
 func main() {
+	// printSomething(1)
+	// printSomething(1.5)
+	// printSomething("Hello, World!")
+
 	fmt.Println("Welcome to the Note Taking App!")
 	title, content := getNoteData()
 
@@ -29,6 +33,24 @@ func main() {
 	}
 
 	outputtable(userNote).Display()
+}
+
+// printSomething может принимать разные типы данных и выводить их на экран
+func printSomething(value any) {
+	// typeVal, ok := value.(int)
+	// if ok {
+	// 	fmt.Println("Integer value:", typeVal)
+	// } else {
+	// 	fmt.Println("Value is not an integer, it is of type:", fmt.Sprintf("%T", value))
+	// }
+	// switch v := value.(type) {
+	// case string:
+	// 	fmt.Println("String value:", v)
+	// case int:
+	// 	fmt.Println("Integer value:", v)
+	// default:
+	// 	fmt.Println("Unknown type")
+	// }
 }
 
 
