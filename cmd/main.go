@@ -1,17 +1,14 @@
 package main
 
-import "fmt"
+import (
+	"fmt"
+)
 
 func main() {
-	fmt.Println(add(32, 22))
+	result := add(5, 10)
+	fmt.Println(result)
 }
 
-func add(a, b any) any {
-	aInt, aIsInt := a.(int)
-	bInt, bIsInt := b.(int)
-
-	if aIsInt && bIsInt {
-		return aInt + bInt
-	}
-	return nil
+func add[T int | float64 | string](a, b T) T {
+	return a + b
 }
