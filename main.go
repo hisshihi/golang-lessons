@@ -3,6 +3,10 @@ package main
 import "fmt"
 
 func main() {
-	prices := [4]float64{10.99, 20.50, 5.45, 15.0}
-	fmt.Println(prices[1:3])
+	prices := []float64{10.99, 20.49}
+	fmt.Printf("Prices: %v\n", prices)
+	fmt.Printf("Second element in prices: %v\n", prices[1])
+
+	prices = append(prices, 19.99)
+	fmt.Printf("Updated prices: %v\n", prices)
 }
