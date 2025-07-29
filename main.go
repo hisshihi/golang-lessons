@@ -2,25 +2,29 @@ package main
 
 import "fmt"
 
-type floatMap map[string]float64
-
-func (m floatMap) output() {
-	fmt.Println(m)
-}
+type transformFn func(int) int
 
 func main() {
-	userNames := make([]string, 0, 3)
+	nubmers := []int{1, 2, 3, 4, 5, 6, 7, 8, 9, 10}
+	doubleNumbers := transformNumbers(&nubmers, double)
+	tripleNumbers := transformNumbers(&nubmers, triple)
+	fmt.Printf("Double numbers: %v\n", doubleNumbers)
+	fmt.Printf("Triple numbers: %v", tripleNumbers)
+}
 
-	userNames = append(userNames, "Denis")
-	userNames = append(userNames, "Arina")
-	userNames = append(userNames, "Musinia")
+func transformNumbers(numbers *[]int, transform transformFn) []int {
+	dNumbers := []int{}
 
-	fmt.Println(userNames)
+	for _, val := range *numbers {
+		dNumbers = append(dNumbers, transform(val))
+	}
+	return dNumbers
+}
 
-	courseRatings := make(floatMap, 2)
+func double(number int) int {
+	return number * 2
+}
 
-	courseRatings["go"] = 5.0
-	courseRatings["java"] = 4.8
-
-	courseRatings.output()
+func triple(number int) int {
+	return number * 3
 }
