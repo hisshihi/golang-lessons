@@ -2,23 +2,25 @@ package main
 
 import "fmt"
 
-type Product struct {
-	ID    int
-	Title string
-	Price float64
+type floatMap map[string]float64
+
+func (m floatMap) output() {
+	fmt.Println(m)
 }
 
 func main() {
-	websites := map[string]string{
-		"Google": "https://google.com",
-		"Amazon Web Services": "https://aws.com",
-	}
+	userNames := make([]string, 0, 3)
 
-	fmt.Println(websites["Amazon Web Services"])
-	fmt.Println(websites)
-	websites["LinkedIn"] = "https://linkedin.com"
-	fmt.Println(websites)
+	userNames = append(userNames, "Denis")
+	userNames = append(userNames, "Arina")
+	userNames = append(userNames, "Musinia")
 
-	delete(websites, "Google")
-	fmt.Println(websites)
+	fmt.Println(userNames)
+
+	courseRatings := make(floatMap, 2)
+
+	courseRatings["go"] = 5.0
+	courseRatings["java"] = 4.8
+
+	courseRatings.output()
 }
