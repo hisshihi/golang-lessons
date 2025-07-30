@@ -5,12 +5,14 @@ import (
 )
 
 func main() {
-	fmt.Println(factorial(5))
+	fmt.Println(sumup(10, 2, 3, 4, 5, 40, 234, 11))
 }
 
-func factorial(number int) int {
-	if number == 0 {
-		return 1
+func sumup(startingValue int, numbers ...int) int {
+	sumNumber := startingValue
+
+	for _, number := range numbers {
+		sumNumber += number
 	}
-	return number * factorial(number - 1)
+	return sumNumber
 }
