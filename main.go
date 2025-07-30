@@ -5,24 +5,18 @@ import (
 )
 
 func main() {
-	numbers := []int{1, 2, 3}
-	
-	transformedDouble := transformFu(numbers, func(number int) int {
-		return number * 2
-	})
-	fmt.Println(transformedDouble)
+	c1 := makeCounter(10)
+	c2 := makeCounter(15)
 
-	transformedTriple := transformFu(numbers, func(number int) int {
-		return number * 3
-	})
-	fmt.Println(transformedTriple)
+	fmt.Println(c1())
+	fmt.Println(c1())
+	fmt.Println(c2())
 }
 
-func transformFu(numbers []int, transfrom func(int) int) []int {
-	transformedNumbers := []int{}
-
-	for _, number := range numbers {
-		transformedNumbers = append(transformedNumbers, transfrom(number))
+func makeCounter(number int) func() int {
+	count := number
+	return func() int {
+		count++
+		return count
 	}
-	return transformedNumbers
 }
