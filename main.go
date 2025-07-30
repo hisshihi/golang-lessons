@@ -5,18 +5,12 @@ import (
 )
 
 func main() {
-	c1 := makeCounter(10)
-	c2 := makeCounter(15)
-
-	fmt.Println(c1())
-	fmt.Println(c1())
-	fmt.Println(c2())
+	fmt.Println(factorial(5))
 }
 
-func makeCounter(number int) func() int {
-	count := number
-	return func() int {
-		count++
-		return count
+func factorial(number int) int {
+	if number == 0 {
+		return 1
 	}
+	return number * factorial(number - 1)
 }
