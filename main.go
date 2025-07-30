@@ -1,48 +1,28 @@
 package main
 
-import "fmt"
-
-type transformFn func(int) int
+import (
+	"fmt"
+)
 
 func main() {
-	nubmers := []int{1, 2, 3, 4, 5, 6, 7, 8, 9, 10}
-	moreNumbers := []int{5, 34, 4, 22}
-	doubleNumbers := transformNumbers(&nubmers, double)
-	tripleNumbers := transformNumbers(&nubmers, triple)
-	fmt.Printf("Double numbers: %v\n", doubleNumbers)
-	fmt.Printf("Triple numbers: %v", tripleNumbers)
+	numbers := []int{1, 2, 3}
+	
+	transformedDouble := transformFu(numbers, func(number int) int {
+		return number * 2
+	})
+	fmt.Println(transformedDouble)
 
-	transformerFu1 := getTransformFu(&nubmers)
-	transformerFu2 := getTransformFu(&moreNumbers)
-
-	transformedNumbers := transformNumbers(&nubmers, transformerFu1)
-	moreTransformedNumbers := transformNumbers(&nubmers, transformerFu2)
-
-	fmt.Println(transformedNumbers)
-	fmt.Println(moreTransformedNumbers)
+	transformedTriple := transformFu(numbers, func(number int) int {
+		return number * 3
+	})
+	fmt.Println(transformedTriple)
 }
 
-func transformNumbers(numbers *[]int, transform transformFn) []int {
-	dNumbers := []int{}
+func transformFu(numbers []int, transfrom func(int) int) []int {
+	transformedNumbers := []int{}
 
-	for _, val := range *numbers {
-		dNumbers = append(dNumbers, transform(val))
+	for _, number := range numbers {
+		transformedNumbers = append(transformedNumbers, transfrom(number))
 	}
-	return dNumbers
-}
-
-func double(number int) int {
-	return number * 2
-}
-
-func triple(number int) int {
-	return number * 3
-}
-
-func getTransformFu(numbers *[]int) transformFn {
-	if (*numbers)[0] % 2 == 0 {
-		return double
-	} else {
-		return triple
-	}
+	return transformedNumbers
 }
