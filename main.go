@@ -5,14 +5,19 @@ import (
 )
 
 func main() {
-	fmt.Println(sumup(10, 2, 3, 4, 5, 40, 234, 11))
+	numbers := []int{1, 2, 3, 4, 5}
+	sum := sumup(1, 10, 23, 84, 44, -4)
+	anotherSum := sumup(numbers...)
+
+	fmt.Println(sum)
+	fmt.Println(anotherSum)
 }
 
-func sumup(startingValue int, numbers ...int) int {
-	sumNumber := startingValue
+func sumup(numbers ...int) int {
+	sumNumber := 0
 
 	for _, number := range numbers {
 		sumNumber += number
 	}
-	return sumNumber
+		return sumNumber
 }
