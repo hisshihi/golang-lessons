@@ -2,46 +2,31 @@
 package prices
 
 import (
-	"bufio"
 	"fmt"
-	"os"
-	"strconv"
+
+	"github.com/hisshihi/golang-lessons/conversion"
+	"github.com/hisshihi/golang-lessons/filemanager"
 )
 
 type TaxIncludedPriceJob struct {
 	TaxRate           float64
 	InputPrices       []float64
-	TaxIncludedPrices map[string]float64
+	TaxIncludedPrices map[string]string
 }
 
 func (job *TaxIncludedPriceJob) LoadData() error {
-	// Загружаем файл и получаем данные о ценах
-	file, err := os.Open("prices.txt")
+	lines, err := filemanager.ReadLines("prices.txt")
 	if err != nil {
-		return fmt.Errorf("возникла ошибка с чтением файла: %v", err.Error())
-	}
-	defer file.Close()
-
-	scanner := bufio.NewScanner(file)
-
-	var lines []string
-	for scanner.Scan() {
-		lines = append(lines, scanner.Text())
+		return fmt.Errorf("ошибка при загрузке данных: %v", err)
 	}
 
-	err = scanner.Err()
+	if len(lines) == 0 {
+		return fmt.Errorf("файл пустой или не содержит данных")
+	}
+
+	prices, err := conversion.StringsToFloat(lines)
 	if err != nil {
-		return fmt.Errorf("возникла ошибка с чтением данных из файла: %v", err.Error())
-	}
-
-	prices := make([]float64, len(lines))
-	for lineIndex, line := range lines {
-		price, err := strconv.ParseFloat(line, 64)
-		if err != nil {
-			return fmt.Errorf("не удалось преобразовать строку в float: %v", err.Error())
-		}
-
-		prices[lineIndex] = price
+		return fmt.Errorf(err.Error())
 	}
 
 	job.InputPrices = prices
@@ -58,13 +43,15 @@ func (job *TaxIncludedPriceJob) Process() {
 		result[fmt.Sprintf("%.2f", price)] = fmt.Sprintf("%.2f", taxIncludedPrice)
 	}
 
-	fmt.Println(result)
+	job.TaxIncludedPrices = result
+
+	filemanager.WriteJSON(job, fmt.Sprintf("result_%.0f.json", job.TaxRate*100))
 }
 
 func NewTaxIncludedPriceJob(taxRate float64) *TaxIncludedPriceJob {
 	return &TaxIncludedPriceJob{
 		InputPrices:       []float64{10, 20, 30},
 		TaxRate:           taxRate,
-		TaxIncludedPrices: map[string]float64{},
+		TaxIncludedPrices: map[string]string{},
 	}
 }
