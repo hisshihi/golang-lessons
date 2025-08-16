@@ -1,6 +1,8 @@
 package main
 
 import (
+	"fmt"
+
 	"github.com/hisshihi/golang-lessons/prices"
 )
 
@@ -11,4 +13,5 @@ func main() {
 		priceJob := prices.NewTaxIncludedPriceJob(taxRate)
 		priceJob.Process()
 	}
+	fmt.Println("Done.")
 }
