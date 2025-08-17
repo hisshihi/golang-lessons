@@ -9,8 +9,8 @@ import (
 )
 
 type FileManager struct {
-	InputFilePath string
-	OutputFilePath string
+	InputFilePath  string `json:"input_file_path"`
+	OutputFilePath string `json:"output_file_path"`
 }
 
 func (fm FileManager) ReadLines() ([]string, error) {
@@ -54,7 +54,7 @@ func (fm FileManager) WriteResult(data any) error {
 
 func NewFileManager(inputPath, outputPath string) FileManager {
 	return FileManager{
-		InputFilePath: inputPath,
+		InputFilePath:  inputPath,
 		OutputFilePath: outputPath,
 	}
 }
