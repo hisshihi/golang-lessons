@@ -5,14 +5,14 @@ import (
 	"fmt"
 
 	"github.com/hisshihi/golang-lessons/conversion"
-	"github.com/hisshihi/golang-lessons/filemanager"
+	"github.com/hisshihi/golang-lessons/iomanager"
 )
 
 type TaxIncludedPriceJob struct {
-	TaxRate           float64                 `json:"tax_rate"`
-	InputPrices       []float64               `json:"input_prices"`
-	TaxIncludedPrices map[string]string       `json:"tax_included_prices"`
-	IOManager         filemanager.FileManager `json:"-"`
+	TaxRate           float64             `json:"tax_rate"`
+	InputPrices       []float64           `json:"input_prices"`
+	TaxIncludedPrices map[string]string   `json:"tax_included_prices"`
+	IOManager         iomanager.IOManager `json:"-"`
 }
 
 func (job *TaxIncludedPriceJob) LoadData() error {
@@ -49,10 +49,10 @@ func (job *TaxIncludedPriceJob) Process() {
 	job.IOManager.WriteResult(job)
 }
 
-func NewTaxIncludedPriceJob(taxRate float64, fm filemanager.FileManager) *TaxIncludedPriceJob {
+func NewTaxIncludedPriceJob(taxRate float64, iom iomanager.IOManager) *TaxIncludedPriceJob {
 	return &TaxIncludedPriceJob{
 		InputPrices: []float64{10, 20, 30},
 		TaxRate:     taxRate,
-		IOManager:   fm,
+		IOManager:   iom,
 	}
 }
