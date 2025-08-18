@@ -25,7 +25,6 @@ Loop:
 			if numErr, ok := err.(*strconv.NumError); ok {
 				switch numErr.Err {
 				case strconv.ErrSyntax:
-					fmt.Println("Отработал case ошибки")
 					break Loop
 				default:
 					fmt.Println("Возникла ошибка ввода, попробуйте ещё раз.")
