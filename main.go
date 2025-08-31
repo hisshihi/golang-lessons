@@ -1,38 +1,37 @@
 package main
 
 import (
-	"fmt"
-	"time"
+	"context"
+	"net/http"
 
-	"github.com/hisshihi/golang-lessons/filemanager"
-	"github.com/hisshihi/golang-lessons/prices"
+	"github.com/gin-gonic/gin"
+	"github.com/hisshihi/golang-lessons/models"
 )
 
 func main() {
-	now := time.Now()
-	taxRates := []float64{0, 0.07, 0.1, 0.15}
-	doneChans := make([]chan bool, len(taxRates))
-	errorChans := make([]chan error, len(taxRates))
+	server := gin.Default()
 
-	for i, taxRate := range taxRates {
-		doneChans[i] = make(chan bool)
-		errorChans[i] = make(chan error)
-		fm := filemanager.NewFileManager("prices.txt", fmt.Sprintf("result_%.0f.json", taxRate*100))
-		// cmdm := cmdmanager.NewCMDManager()
-		priceJob := prices.NewTaxIncludedPriceJob(taxRate, fm)
-		go priceJob.Process(doneChans[i], errorChans[i])
+	server.GET("/events", getEvents)
+	server.POST("/events", createEvent)
+	
+	server.Run(":8080")
+}
+
+func getEvents(c *gin.Context) {
+	events := models.GetAllEvents
+	c.JSON(http.StatusOK, gin.H{
+		"success": true,
+		"events":  events,
+	})
+}
+
+func createEvent(c *gin.Context) {
+	var event models.Event
+	if err := c.ShouldBindJSON(&event); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"success": false,
+			"error": "bad request body",
+		})
+		return
 	}
-
-	for i := range taxRates {
-		select {
-		case err := <-errorChans[i]:
-			if err != nil {
-				fmt.Printf("Возникла ошибка: %v\n", err)
-			}
-		case <-doneChans[i]:
-			fmt.Println("Done.")
-		}
-	}
-
-	fmt.Println(time.Since(now))
 }
