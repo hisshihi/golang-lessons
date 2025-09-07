@@ -17,6 +17,7 @@ func main() {
 
 	server.GET("/events", getEvents)
 	server.POST("/events", createEvent)
+	server.GET("/events/:id", getEventByID)
 
 	server.Run(":8080")
 }
@@ -68,6 +69,35 @@ func createEvent(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusCreated, gin.H{
+		"success": true,
+		"event":   event,
+	})
+}
+
+type eventByID struct {
+	ID int64 `uri:"id" binding:"required"`
+}
+
+func getEventByID(c *gin.Context) {
+	var req eventByID
+	if err := c.ShouldBindUri(&req); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"success": false,
+			"error":   "bad request body",
+		})
+		return
+	}
+
+	event, err := models.GetEventByID(req.ID)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"success": false,
+			"error":   "error with get event",
+		})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{
 		"success": true,
 		"event":   event,
 	})

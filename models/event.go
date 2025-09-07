@@ -9,7 +9,7 @@ import (
 )
 
 type Event struct {
-	ID          int64     `binding:"required" json:"id"`
+	ID          int64     `json:"id"`
 	Name        string    `binding:"required" json:"name"`
 	Description string    `binding:"required" json:"description"`
 	Location    string    `binding:"required" json:"location"`
@@ -62,4 +62,15 @@ func GetAllEvents() ([]Event, error) {
 	}
 
 	return events, nil
+}
+
+func GetEventByID(id int64) (Event, error) {
+	var event Event
+	q := "SELECT * FROM events WHERE id = ?"
+	row := db.DB.QueryRow(q, id)
+	err := row.Scan(&event.ID, &event.Name, &event.Description, &event.Location, &event.DateTime, &event.UserID)
+	if err != nil {
+		return Event{}, err
+	}
+	return event, nil
 }
