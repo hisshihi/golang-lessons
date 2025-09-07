@@ -28,8 +28,8 @@ func createTables() {
 		id INTEGER PRIMARY KEY AUTOINCREMENT,
 		name TEXT NOT NULL,
 		description TEXT NOT NULL,
-		localtion TEXT NOT NULL,
-		dateTIme DATETIME NOT NULL,
+		location TEXT NOT NULL,
+		dateTime DATETIME NOT NULL,
 		user_id INTEGER
 	)
 	`
