@@ -90,6 +90,13 @@ func getEventByID(c *gin.Context) {
 
 	event, err := models.GetEventByID(req.ID)
 	if err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			c.JSON(http.StatusNotFound, gin.H{
+				"success": false,
+				"event":   event,
+			})
+			return
+		}
 		c.JSON(http.StatusInternalServerError, gin.H{
 			"success": false,
 			"error":   "error with get event",
