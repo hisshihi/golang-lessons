@@ -19,11 +19,13 @@ func signup(c *gin.Context) {
 
 	var sqliteErr sqlite3.Error
 	if err := user.Save(); err != nil {
-		if errors.As(err, &sqliteErr) && sqliteErr.ExtendedCode == sqlite3.ErrConstraintUnique {
-			c.JSON(http.StatusConflict, gin.H{"error": "Email already in use"})
-			return
+		status, msg := handleDBError(err)
+		if errors.As(err, &sqliteErr) {
+			if sqliteErr.ExtendedCode == sqlite3.ErrConstraintUnique {
+				msg = "Email already in use"
+			}
 		}
-		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		c.JSON(status, gin.H{"error": msg})
 		return
 	}
 
@@ -43,13 +45,28 @@ func getUserByEmail(c *gin.Context) {
 
 	user, err := models.GetUserByEmail(req.Email)
 	if err != nil {
-		if err == sql.ErrNoRows {
-			c.JSON(http.StatusNotFound, gin.H{"error": "User not found"})
-			return
-		}
-		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		status, msg := handleDBError(err)
+		c.JSON(status, gin.H{"error": msg})
 		return
 	}
 
 	c.JSON(http.StatusOK, user)
+}
+
+// Обработка ошибок sqlite3 и sql
+func handleDBError(err error) (int, string) {
+	var sqliteErr sqlite3.Error
+	switch {
+	case errors.As(err, &sqliteErr):
+		switch sqliteErr.ExtendedCode {
+		case sqlite3.ErrConstraintUnique:
+			return http.StatusConflict, "Email already in use"
+		default:
+			return http.StatusInternalServerError, sqliteErr.Error()
+		}
+	case errors.Is(err, sql.ErrNoRows):
+		return http.StatusNotFound, "User not found"
+	default:
+		return http.StatusInternalServerError, err.Error()
+	}
 }
