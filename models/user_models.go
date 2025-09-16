@@ -2,6 +2,8 @@ package models
 
 import "github.com/hisshihi/golang-lessons/db"
 
+const ErrUserNotFound = "sql: no rows in result set"
+
 type User struct {
 	ID       int    `json:"id"`
 	Email    string `json:"email" binding:"required,email"`
@@ -31,4 +33,18 @@ func (u *User) Save() error {
 	u.ID = int(lastID)
 
 	return nil
+}
+
+func GetUserByEmail(email string) (*User, error) {
+	q := `
+		SELECT email, password
+		FROM users
+		WHERE email = ?
+	`
+	var user User
+	err := db.DB.QueryRow(q, email).Scan(&user.Email, &user.Password)
+	if err != nil {
+		return nil, err
+	}
+	return &user, nil
 }

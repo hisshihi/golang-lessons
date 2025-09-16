@@ -10,5 +10,6 @@ func Server(server *gin.Engine) {
 	server.GET(eventsID, getEventByID)
 	server.PUT(eventsID, updateEventByID)
 	server.DELETE(eventsID, deleteEventByID)
-	server.POST("/signup")
+	server.POST("/signup", signup)
+	server.GET("/user", getUserByEmail)
 }
