@@ -15,6 +15,10 @@ func signup(c *gin.Context) {
 	}
 
 	if err := user.Save(); err != nil {
+		if err.Error() == models.ErrUniqueEmail {
+			c.JSON(http.StatusConflict, gin.H{"error": "Email already in use"})
+			return
+		}
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}

@@ -3,6 +3,7 @@ package models
 import "github.com/hisshihi/golang-lessons/db"
 
 const ErrUserNotFound = "sql: no rows in result set"
+const ErrUniqueEmail = "UNIQUE constraint failed: users.email"
 
 type User struct {
 	ID       int    `json:"id"`
