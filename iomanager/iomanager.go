@@ -1,7 +1,0 @@
-// Package iomanager утилитные файлы и тд
-package iomanager
-
-type IOManager interface {
-	ReadLines() ([]string, error)
-	WriteResult(data any) error
-}
