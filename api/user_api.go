@@ -1,10 +1,13 @@
 package api
 
 import (
+	"database/sql"
+	"errors"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
 	"github.com/hisshihi/golang-lessons/models"
+	"github.com/mattn/go-sqlite3"
 )
 
 func signup(c *gin.Context) {
@@ -14,8 +17,9 @@ func signup(c *gin.Context) {
 		return
 	}
 
+	var sqliteErr sqlite3.Error
 	if err := user.Save(); err != nil {
-		if err.Error() == models.ErrUniqueEmail {
+		if errors.As(err, &sqliteErr) && sqliteErr.ExtendedCode == sqlite3.ErrConstraintUnique {
 			c.JSON(http.StatusConflict, gin.H{"error": "Email already in use"})
 			return
 		}
@@ -39,7 +43,7 @@ func getUserByEmail(c *gin.Context) {
 
 	user, err := models.GetUserByEmail(req.Email)
 	if err != nil {
-		if err.Error() == models.ErrUserNotFound {
+		if err == sql.ErrNoRows {
 			c.JSON(http.StatusNotFound, gin.H{"error": "User not found"})
 			return
 		}
