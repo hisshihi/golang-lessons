@@ -1,9 +1,14 @@
 package models
 
-import "github.com/hisshihi/golang-lessons/db"
+import (
+	"github.com/hisshihi/golang-lessons/db"
+	"github.com/hisshihi/golang-lessons/utils"
+)
 
-const ErrUserNotFound = "sql: no rows in result set"
-const ErrUniqueEmail = "UNIQUE constraint failed: users.email"
+const (
+	ErrUserNotFound = "sql: no rows in result set"
+	ErrUniqueEmail  = "UNIQUE constraint failed: users.email"
+)
 
 type User struct {
 	ID       int    `json:"id"`
@@ -22,7 +27,12 @@ func (u *User) Save() error {
 	}
 	defer stmt.Close()
 
-	result, err := stmt.Exec(u.Email, u.Password)
+	HashPassword, err := utils.HashPassword(u.Password)
+	if err != nil {
+		return err
+	}
+
+	result, err := stmt.Exec(u.Email, HashPassword)
 	if err != nil {
 		return err
 	}
