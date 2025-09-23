@@ -1,40 +1,45 @@
 package main
 
-import (
-	"bufio"
-	"fmt"
-	"io"
-	"os"
-	"strconv"
-	"strings"
+import "fmt"
+
+const (
+	High = iota
+	Medium
+	Low
 )
 
-func main() {
-	fmt.Print("Please, enter numbers separated by spaces: ")
-	r := bufio.NewReader(os.Stdin)
+type PriorityQueue[P comparable, V any] struct {
+	items      map[P][]V
+	priorities []P
+}
 
-	sum := 0
+func NewPriorityQueue[P comparable, V any](priorities []P) *PriorityQueue[P, V] {
+	return &PriorityQueue[P, V]{items: map[P][]V{}, priorities: priorities}
+}
 
-	for {
-		input, inputErr := r.ReadString(' ')
-		n := strings.TrimSpace(input)
-		if n == "" {
-			continue
-		}
+func (pq *PriorityQueue[P, V]) Add(priority P, value V) {
+	pq.items[priority] = append(pq.items[priority], value)
+}
 
-		num, numErr := strconv.Atoi(n)
-		if numErr != nil {
-			fmt.Println(numErr)
-		} else {
-			sum += num
-		}
-
-		if inputErr == io.EOF {
-			break
-		}
-		if inputErr != nil {
-			fmt.Println(inputErr)
+func (pq *PriorityQueue[P, V]) Next() (V, bool) {
+	for i := 0; i < len(pq.priorities); i++ {
+		priority := pq.priorities[i]
+		item := pq.items[priority]
+		if len(item) > 0 {
+			next := item[0]
+			pq.items[priority] = item[1:]
+			return next, true
 		}
 	}
-	fmt.Println(sum)
+	return *new(V), false
+}
+
+func main() {
+	queue := NewPriorityQueue[int, string]([]int{High, Medium, Low})
+
+	queue.Add(Low, "L-1")
+	queue.Add(Medium, "M-1")
+	queue.Add(High, "H-1")
+
+	fmt.Println(queue.Next())
 }
