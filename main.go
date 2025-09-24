@@ -1,45 +1,69 @@
 package main
 
-import "fmt"
-
-const (
-	High = iota
-	Medium
-	Low
+import (
+	"fmt"
+	"sync"
+	"time"
 )
 
-type PriorityQueue[P comparable, V any] struct {
-	items      map[P][]V
-	priorities []P
-}
+var wg sync.WaitGroup
 
-func NewPriorityQueue[P comparable, V any](priorities []P) *PriorityQueue[P, V] {
-	return &PriorityQueue[P, V]{items: map[P][]V{}, priorities: priorities}
-}
-
-func (pq *PriorityQueue[P, V]) Add(priority P, value V) {
-	pq.items[priority] = append(pq.items[priority], value)
-}
-
-func (pq *PriorityQueue[P, V]) Next() (V, bool) {
-	for i := 0; i < len(pq.priorities); i++ {
-		priority := pq.priorities[i]
-		item := pq.items[priority]
-		if len(item) > 0 {
-			next := item[0]
-			pq.items[priority] = item[1:]
-			return next, true
+func simpleSearchInSlice[T comparable](slice []T, target T) T {
+	for _, item := range slice {
+		if item == target {
+			return item
 		}
 	}
-	return *new(V), false
+	return *new(T)
+}
+
+func parallelSearch[T comparable](slice []T, target T) T {
+	numGorutines := 4
+	length := len(slice)
+	results := make(chan T, numGorutines)
+
+	segmentSize := (length + numGorutines - 1) / numGorutines
+
+	for i := range numGorutines {
+		start := i * segmentSize
+		end := start + segmentSize
+		if end > length {
+			end = length
+		}
+
+		wg.Add(1)
+
+		go func(start, end int) {
+			defer wg.Done()
+			for j := start; j < end; j++ {
+				if slice[j] == target {
+					results <- slice[j]
+					return
+				}
+			}
+		}(start, end)
+	}
+
+	go func() {
+		wg.Wait()
+		close(results)
+	}()
+
+	return <-results
 }
 
 func main() {
-	queue := NewPriorityQueue[int, string]([]int{High, Medium, Low})
+	slice := make([]int, 10000000)
+	for i := range slice {
+		slice[i] = i * 3
+	}
+	now := time.Now()
+	item := simpleSearchInSlice(slice, 9213456)
+	fmt.Println(item)
+	fmt.Println(time.Since(now))
 
-	queue.Add(Low, "L-1")
-	queue.Add(Medium, "M-1")
-	queue.Add(High, "H-1")
-
-	fmt.Println(queue.Next())
+	now = time.Now()
+	item = parallelSearch(slice, 9213456)
+	fmt.Println(item)
+	fmt.Println(time.Since(now))
 }
