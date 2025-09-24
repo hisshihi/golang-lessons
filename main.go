@@ -1,69 +1,31 @@
 package main
 
-import (
-	"fmt"
-	"sync"
-	"time"
-)
+import "log"
 
-var wg sync.WaitGroup
-
-func simpleSearchInSlice[T comparable](slice []T, target T) T {
-	for _, item := range slice {
-		if item == target {
-			return item
-		}
-	}
-	return *new(T)
+type Cache[K comparable, V any] struct {
+	data map[K]V
 }
 
-func parallelSearch[T comparable](slice []T, target T) T {
-	numGorutines := 4
-	length := len(slice)
-	results := make(chan T, numGorutines)
+func NewCache[K comparable, V any]() *Cache[K, V] {
+	return &Cache[K, V]{make(map[K]V)}
+}
 
-	segmentSize := (length + numGorutines - 1) / numGorutines
+func (c *Cache[K, V]) Add(key K, value V) {
+	c.data[key] = value
+}
 
-	for i := range numGorutines {
-		start := i * segmentSize
-		end := start + segmentSize
-		if end > length {
-			end = length
-		}
-
-		wg.Add(1)
-
-		go func(start, end int) {
-			defer wg.Done()
-			for j := start; j < end; j++ {
-				if slice[j] == target {
-					results <- slice[j]
-					return
-				}
-			}
-		}(start, end)
-	}
-
-	go func() {
-		wg.Wait()
-		close(results)
-	}()
-
-	return <-results
+func (c *Cache[K, V]) Get(key K) (V, bool) {
+	value, ok := c.data[key]
+	return  value, ok
 }
 
 func main() {
-	slice := make([]int, 10000000)
-	for i := range slice {
-		slice[i] = i * 3
-	}
-	now := time.Now()
-	item := simpleSearchInSlice(slice, 9213456)
-	fmt.Println(item)
-	fmt.Println(time.Since(now))
+	cache := NewCache[any, any]()
 
-	now = time.Now()
-	item = parallelSearch(slice, 9213456)
-	fmt.Println(item)
-	fmt.Println(time.Since(now))
+	cache.Add("", "value")
+	value, ok := cache.Get("")
+	if !ok {
+		log.Fatal("value not found")
+	}
+	log.Println(value)
 }
