@@ -4,4 +4,4 @@ server:
 test:
 	go test -v -cover ./...
 
-.PHONY: server
+.PHONY: server test
