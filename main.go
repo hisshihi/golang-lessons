@@ -11,6 +11,7 @@ import (
 	"log"
 	"os"
 	"strings"
+	"sync"
 
 	"github.com/chai2010/webp"
 	"github.com/google/uuid"
@@ -33,17 +34,34 @@ func makeWork[I any](base64Images ...I) <-chan I {
 	return out
 }
 
-func pipline[I any, O any](quit <-chan struct{}, input <-chan I, worker func(I) O) <-chan O {
+func pipline[I any, O any](input <-chan I, worker func(I) O) <-chan O {
 	out := make(chan O, 3)
 	go func() {
 		defer close(out)
 		for i := range input {
-			select {
-			case out <- worker(i):
-			case <-quit:
-				return
-			}
+			out <- worker(i)
 		}
+	}()
+	return out
+}
+
+func fanIn[T any](channels ...<-chan T) <-chan T {
+	var wg sync.WaitGroup
+	out := make(chan T)
+
+	wg.Add(len(channels))
+
+	for _, ch := range channels {
+		go func(c <-chan T) {
+			defer wg.Done()
+			for i := range c {
+				out <- i
+			}
+		}(ch)
+	}
+	go func() {
+		wg.Wait()
+		close(out)
 	}()
 	return out
 }
@@ -94,15 +112,30 @@ func saveToDisk(buf bytes.Buffer) {
 }
 
 func main() {
-	quit := make(chan struct{})
-	var signal struct{}
-
 	images := makeWork(fileNames...)
-	loadedImages := pipline(quit, images, loadImage)
-	encodedImages := pipline(quit, loadedImages, encodeBase64)
-	quit <- signal
-	decodedImages := pipline(quit, encodedImages, decodeBase64)
-	webpImages := pipline(quit, decodedImages, encodeToWeb)
+	loadedImages1 := pipline(images, loadImage)
+	loadedImages2 := pipline(images, loadImage)
+	loadedImages3 := pipline(images, loadImage)
+
+	loadedImages := fanIn(loadedImages1, loadedImages2, loadedImages3)
+
+	encodedImages1 := pipline(loadedImages, encodeBase64)
+	encodedImages2 := pipline(loadedImages, encodeBase64)
+	encodedImages3 := pipline(loadedImages, encodeBase64)
+
+	encodedImages := fanIn(encodedImages1, encodedImages2, encodedImages3)
+
+	decodedImages1 := pipline(encodedImages, decodeBase64)
+	decodedImages2 := pipline(encodedImages, decodeBase64)
+	decodedImages3 := pipline(encodedImages, decodeBase64)
+
+	decodedImages := fanIn(decodedImages1, decodedImages2, decodedImages3)
+
+	webpImages1 := pipline(decodedImages, encodeToWeb)
+	webpImages2 := pipline(decodedImages, encodeToWeb)
+	webpImages3 := pipline(decodedImages, encodeToWeb)
+
+	webpImages := fanIn(webpImages1, webpImages2, webpImages3)
 
 	for webpImg := range webpImages {
 		saveToDisk(webpImg)
