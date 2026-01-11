@@ -1,25 +1,36 @@
 package main
 
 import (
-	"github.com/hisshihi/golang-lessons/payments"
-	"github.com/hisshihi/golang-lessons/payments/methods"
-	"github.com/k0kubun/pp/v3"
+	"fmt"
+	"os"
+	"time"
 )
 
 func main() {
-	method := methods.NewBonus()
+	defer func() {
+		p := recover()
+		if p != nil {
+			err := WritePanicMsgToFile(fmt.Sprintf("Datetime: %v Panic msg: %v\n", time.Now(), p))
+			if err != nil {
+				fmt.Println("Error writing panic message to file:", err)
+			}
+		}
+	}()
+	slice := []int{1, 2, 3}
+	fmt.Println(slice[4])
+}
 
-	paymentMethod := payments.NewPaymentModule(method)
+func WritePanicMsgToFile(panicInfo string) error {
+	file, err := os.OpenFile("panic.log", os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
+	if err != nil {
+		return fmt.Errorf("error opening or creating file: %v", err)
+	}
+	defer file.Close()
 
-	operation1 := paymentMethod.Pay("Шоколадная колбаска", 2)
-	paymentMethod.Pay("Кофе", 3)
-	paymentMethod.Pay("Сендвич", 4)
+	_, err = file.WriteString(panicInfo)
+	if err != nil {
+		return fmt.Errorf("error writing panic message to file: %v", err)
+	}
 
-	allInfo := paymentMethod.AllInfo()
-	pp.Println("Все операции", allInfo)
-	
-	paymentMethod.Cancel(operation1)
-	
-	info := paymentMethod.Info(operation1)
-	pp.Println("Информация по операции", info)
+	return nil
 }
