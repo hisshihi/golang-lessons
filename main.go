@@ -7,17 +7,19 @@ import (
 )
 
 func main() {
-	method := methods.NewCrypto()
+	method := methods.NewBonus()
 
-	paymentModule := payments.NewPaymentModule(method)
+	paymentMethod := payments.NewPaymentModule(method)
 
-	operation1 := paymentModule.Pay("Шоколадная колбаска", 2)
-	paymentModule.Pay("Кофе", 3)
-	paymentModule.Pay("Сендвич", 4)
+	operation1 := paymentMethod.Pay("Шоколадная колбаска", 2)
+	paymentMethod.Pay("Кофе", 3)
+	paymentMethod.Pay("Сендвич", 4)
 
-	allInfo := paymentModule.AllInfo()
+	allInfo := paymentMethod.AllInfo()
 	pp.Println("Все операции", allInfo)
 	
-	info := paymentModule.Info(operation1)
-	pp.Println("Информация по операции 1", info)
+	paymentMethod.Cancel(operation1)
+	
+	info := paymentMethod.Info(operation1)
+	pp.Println("Информация по операции", info)
 }

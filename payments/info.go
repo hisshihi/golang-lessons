@@ -1,8 +1,7 @@
 package payments
 
 type PaymentInfo struct {
-	ID          int
-	Description string
-	CountUSD    int
-	IsCancelled bool
+	Description string `json:"description"`
+	CountUSD    int    `json:"count_usd"`
+	IsCancelled bool   `json:"is_cancelled"`
 }

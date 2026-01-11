@@ -37,7 +37,6 @@ func (m *PaymentModule) Pay(description string, usd int) int {
 	// - сколько было потрачено
 	// - отменялась ли операция
 	info := PaymentInfo{
-		ID:          id,
 		Description: description,
 		CountUSD:    usd,
 		IsCancelled: false,
