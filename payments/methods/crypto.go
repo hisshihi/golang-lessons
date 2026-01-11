@@ -6,7 +6,7 @@ import (
 	"math/rand"
 )
 
-type Crypto struct {}
+type Crypto struct{}
 
 func NewCrypto() Crypto {
 	return Crypto{}

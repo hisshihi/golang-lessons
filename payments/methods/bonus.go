@@ -5,7 +5,7 @@ import (
 	"math/rand"
 )
 
-type Bonus struct {}
+type Bonus struct{}
 
 func NewBonus() Bonus {
 	return Bonus{}
@@ -18,6 +18,6 @@ func (b Bonus) Pay(usd int) int {
 	return rand.Int()
 }
 
-func (b Bonus) Cancel(id int)  {
+func (b Bonus) Cancel(id int) {
 	fmt.Println("Отмена операции бонусами с ID:", id)
 }

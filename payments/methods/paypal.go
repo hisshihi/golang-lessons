@@ -5,7 +5,7 @@ import (
 	"math/rand"
 )
 
-type PayPal struct {}
+type PayPal struct{}
 
 func NewPayPal() PayPal {
 	return PayPal{}
