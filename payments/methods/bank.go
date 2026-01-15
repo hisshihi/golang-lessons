@@ -5,8 +5,7 @@ import (
 	"math/rand"
 )
 
-type Bank struct {
-}
+type Bank struct{}
 
 func NewBank() Bank {
 	return Bank{}
