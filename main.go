@@ -6,22 +6,43 @@ import (
 	"time"
 )
 
-func postman(text string, countPostman int) {
-	for i := range countPostman {
-		fmt.Printf("Я почтальён. Я отнёс газету %s в %d раз\n", text, i+1)
-		time.Sleep(200 * time.Millisecond)
+var likes int = 0
+
+func setLike(mu *sync.RWMutex) {
+	for range 100_000 {
+		mu.Lock()
+		likes++
+		mu.Unlock()
+	}
+}
+
+func getLike(mu *sync.RWMutex) {
+	for range 100_000 {
+		mu.RLock()
+		_ = likes
+		mu.RUnlock()
 	}
 }
 
 func main() {
 	wg := &sync.WaitGroup{}
+	rwMu := &sync.RWMutex{}
 
-	namesNews := []string{"Новости", "IT и технологии", "Игровые новости"}
+	initTime := time.Now()
 
-	for _, name := range namesNews {
+	for range 10 {
 		wg.Go(func() {
-			postman(name, len(namesNews))
+			setLike(rwMu)
 		})
 	}
+
+	for range 10 {
+		wg.Go(func() {
+			getLike(rwMu)
+		})
+	}
+
 	wg.Wait()
+
+	fmt.Println("Time taken:", time.Since(initTime))
 }
