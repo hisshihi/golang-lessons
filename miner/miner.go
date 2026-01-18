@@ -22,17 +22,28 @@ func miner(
 	power int,
 ) {
 	for {
+		// select {
+		// case <-ctx.Done():
+		// 	fmt.Printf("Шахтёр номер: %d. Завершение работы\n", n)
+		// 	return
+		// default:
+		// 	fmt.Printf("Я шахтёр номер: %d. Начал добывать уголь\n", n)
+		// 	time.Sleep(1 * time.Second)
+		// 	fmt.Printf("Я шартёр номер: %d. Добыл уголь: %d\n", n, power)
+
+		// 	transferPoint <- power
+		// 	fmt.Printf("Я шахтёр номер: %d. Передал уголь: %d\n", n, power)
+		// }
+
+		fmt.Printf("Я шахтёр номер: %d. Начал добывать уголь\n", n)
+
 		select {
 		case <-ctx.Done():
 			fmt.Printf("Шахтёр номер: %d. Завершение работы\n", n)
 			return
-		default:
-			fmt.Printf("Я шахтёр номер: %d. Начал добывать уголь\n", n)
-			time.Sleep(1 * time.Second)
-			fmt.Printf("Я шартёр номер: %d. Добыл уголь: %d\n", n, power)
-
-			transferPoint <- power
+		case transferPoint <- power:
 			fmt.Printf("Я шахтёр номер: %d. Передал уголь: %d\n", n, power)
+			time.Sleep(1 * time.Second)
 		}
 	}
 }
