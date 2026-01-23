@@ -1,67 +1,39 @@
 package main
 
 import (
-	"context"
 	"fmt"
-	"sync"
-	"sync/atomic"
+	"math/rand"
 	"time"
-
-	"github.com/hisshihi/golang-lessons/miner"
-	"github.com/hisshihi/golang-lessons/postman"
 )
 
+// randWait симулирует случайную работу от 1 до 5 секунд и возвращает количество секунд работы.
+func randWait() int {
+	workSeconds := rand.Intn(5) + 1 // Случайное число от 1 до 5
+
+	time.Sleep(time.Duration(workSeconds) * time.Second)
+
+	return workSeconds
+}
+
 func main() {
-	var coal atomic.Int64
-	var mails []string
-
-	ctx := context.Background()
-	minerContext, minerCancel := context.WithCancel(ctx)
-	postmanContext, postmanCancel := context.WithCancel(ctx)
-
-	coalTransferPoint := miner.MinerPool(minerContext, 2)
-	mailTransferPoint := postman.PostmanPool(postmanContext, 2)
+	ch := make(chan int)
+	totalWorkSeconds := 0
 
 	initTime := time.Now()
-	fmt.Println("<<-----------------Рабочий день шахтёров и почтальонов начался----------------->>")
 
-	go func() {
-		time.Sleep(3 * time.Second)
-		minerCancel()
-		fmt.Println("<<-----------------Рабочий день шахтёров окончен----------------->>")
-	}()
+	for range 100 {
+		go func() {
+			seconds := randWait()
 
-	go func() {
-		time.Sleep(6 * time.Second)
-		postmanCancel()
-		fmt.Println("<<-----------------Рабочий день почтальонов окончен----------------->>")
-	}()
+			ch <- seconds
+		}()
+	}
 
-	wg := &sync.WaitGroup{}
-	mu := &sync.Mutex{}
+	for range 100 {
+		totalWorkSeconds += <-ch
+	}
 
-	wg.Go(func() {
-		for v := range coalTransferPoint {
-			coal.Add(int64(v))
-		}
-	})
-
-	wg.Go(func() {
-		for mail := range mailTransferPoint {
-			mu.Lock()
-			mails = append(mails, mail)
-			mu.Unlock()
-		}
-	})
-
-	wg.Wait()
-
-	fmt.Println("<<-----------------Подведение итогов рабочего дня----------------->>")
-	fmt.Printf("Рабочий день длился: %v\n", time.Since(initTime))
-
-	fmt.Printf("Суммарное кол-во добытого угля: %d\n", coal.Load())
-
-	mu.Lock()
-	fmt.Printf("Суммарное кол-во полученной почты: %v\n", len(mails))
-	mu.Unlock()
+	mainSecond := time.Since(initTime)
+	fmt.Println("main", mainSecond)
+	fmt.Println("total", totalWorkSeconds, "seconds")
 }
