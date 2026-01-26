@@ -78,4 +78,15 @@ test: ## go test
 .PHONY: diff
 diff: ## git diff
 	git diff --exit-code
-	RES=$$(git status --porcelain) ; if [ -n "$$RES" ]; then echo $$RES && exit 1 ; fi
+	RES=$$(git status --porcelain) ; if [ -n "$$RES" ]; then echo $$RES && exit 1 ; f
+
+.PHONY: proto
+proto:
+	rm -f pb/*.go
+	protoc --proto_path=proto --go_out=pb --go_opt=paths=source_relative \
+  --go-grpc_out=pb --go-grpc_opt=paths=source_relative \
+  proto/*.proto
+
+.PHONY: evans
+evans:
+	evans --port 9092 --host localhost --path proto --proto verify.proto repl
