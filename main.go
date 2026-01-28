@@ -6,34 +6,44 @@ import (
 	"time"
 )
 
-// randWait симулирует случайную работу от 1 до 5 секунд и возвращает количество секунд работы.
-func randWait() int {
-	workSeconds := rand.Intn(5) + 1 // Случайное число от 1 до 5
+// writer генерирует числа от 1 до 10
+func writer() <-chan int {
+	ch := make(chan int)
+	go func() {
+		for range 10 {
+			value := rand.Intn(10) + 2
+			ch <- value
+			fmt.Println("writer value - ", value)
+		}
+		close(ch)
+	}()
 
-	time.Sleep(time.Duration(workSeconds) * time.Second)
+	return ch
+}
 
-	return workSeconds
+// double умножает числа на 2, имитируя работу (500ms)
+func double(input <-chan int) <-chan int {
+	output := make(chan int)
+	go func() {
+		for num := range input {
+			time.Sleep(500 * time.Millisecond)
+			value := num * 2
+			output <- value
+			fmt.Println("double value - ", value)
+		}
+		close(output)
+	}()
+
+	return output
+}
+
+// reader читает и выводит на экран
+func reader(input <-chan int) {
+	for num := range input {
+		fmt.Println("output value - ", num)
+	}
 }
 
 func main() {
-	ch := make(chan int)
-	totalWorkSeconds := 0
-
-	initTime := time.Now()
-
-	for range 100 {
-		go func() {
-			seconds := randWait()
-
-			ch <- seconds
-		}()
-	}
-
-	for range 100 {
-		totalWorkSeconds += <-ch
-	}
-
-	mainSecond := time.Since(initTime)
-	fmt.Println("main", mainSecond)
-	fmt.Println("total", totalWorkSeconds, "seconds")
+	reader(double(writer()))
 }
