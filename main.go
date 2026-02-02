@@ -2,33 +2,57 @@ package main
 
 import (
 	"fmt"
-	"math/rand"
+	"sort"
+	"sync"
 	"time"
 )
 
-func randomTimeWork() {
-	randInt := rand.Intn(10) + 1
-	fmt.Println(randInt)
-	time.Sleep(time.Duration(randInt) * time.Second)
-}
-
-// predictbleTimeWork функция обёртка, которая будет прервывать выполнение если функция randomTimeWork работает дольше 3 секунд
-func predictbleTimeWork() {
-	ch := make(chan struct{})
+// writer генерирует числа от 1 до 10 и отправляет их в канал
+func writer() <-chan int {
+	ch := make(chan int)
 
 	go func() {
-		randomTimeWork()
+		for i := range 10 {
+			ch <- i + 1
+		}
 		close(ch)
 	}()
 
-	select {
-	case <-ch:
-	case <-time.After(3 * time.Second):
+	return ch
+}
+
+func doubler(in <-chan int) <-chan int {
+	out := make(chan int)
+	wg := &sync.WaitGroup{}
+
+	for num := range in {
+		wg.Add(1)
+		go func(n int) {
+			time.Sleep(500 * time.Millisecond)
+			out <- n * 2
+			wg.Done()
+		}(num)
+	}
+
+	go func() {
+		wg.Wait()
+		close(out)
+	}()
+
+	return out
+}
+
+func reader(in <-chan int) {
+	var results []int
+	for num := range in {
+		results = append(results, num)
+	}
+	sort.Ints(results)
+	for _, num := range results {
+		fmt.Println(num)
 	}
 }
 
 func main() {
-	initTime := time.Now()
-	predictbleTimeWork()
-	fmt.Println(time.Since(initTime))
+	reader(doubler(writer()))
 }
