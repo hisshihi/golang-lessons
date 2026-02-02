@@ -21,6 +21,7 @@ func writer() <-chan int {
 	return ch
 }
 
+// doubler принимает числа из входного канала, удваивает их с задержкой и отправляет в выходной канал
 func doubler(in <-chan int) <-chan int {
 	out := make(chan int)
 	wg := &sync.WaitGroup{}
@@ -42,6 +43,7 @@ func doubler(in <-chan int) <-chan int {
 	return out
 }
 
+// reader принимает числа из входного канала, сортирует их и выводит на экран
 func reader(in <-chan int) {
 	var results []int
 	for num := range in {
