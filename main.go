@@ -12,7 +12,7 @@ func writer() <-chan int {
 	ch := make(chan int)
 
 	go func() {
-		for i := range 10 {
+		for i := range 10_000 {
 			ch <- i + 1
 		}
 		close(ch)
@@ -56,5 +56,9 @@ func reader(in <-chan int) {
 }
 
 func main() {
+	now := time.Now()
 	reader(doubler(writer()))
+	defer func() {
+		fmt.Println(time.Since(now))
+	}()
 }
