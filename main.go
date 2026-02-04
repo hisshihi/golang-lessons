@@ -1,64 +1,112 @@
 package main
 
 import (
+	"context"
+	"errors"
 	"fmt"
-	"sort"
+	"math/rand"
 	"sync"
 	"time"
 )
 
-// writer генерирует числа от 1 до 10 и отправляет их в канал
-func writer() <-chan int {
+type outVal struct {
+	val int
+	err error
+}
+
+var errTimeout = errors.New("timed out")
+
+func processData(ctx context.Context, val int) chan outVal {
 	ch := make(chan int)
+	out := make(chan outVal)
 
 	go func() {
-		for i := range 10_000 {
-			ch <- i + 1
-		}
+		time.Sleep(time.Duration(rand.Intn(10)) * time.Second)
 		close(ch)
 	}()
 
-	return ch
-}
-
-// doubler принимает числа из входного канала, удваивает их с задержкой и отправляет в выходной канал
-func doubler(in <-chan int) <-chan int {
-	out := make(chan int)
-	wg := &sync.WaitGroup{}
-
-	for num := range in {
-		wg.Add(1)
-		go func(n int) {
-			time.Sleep(500 * time.Millisecond)
-			out <- n * 2
-			wg.Done()
-		}(num)
-	}
-
 	go func() {
-		wg.Wait()
-		close(out)
+		select {
+		case <-ch:
+			out <- outVal{
+				val: val * 2,
+				err: nil,
+			}
+		case <-ctx.Done():
+			out <- outVal{
+				val: 0,
+				err: errTimeout,
+			}
+		}
 	}()
 
 	return out
 }
 
-// reader принимает числа из входного канала, сортирует их и выводит на экран
-func reader(in <-chan int) {
-	var results []int
-	for num := range in {
-		results = append(results, num)
+func main() {
+	inCh := make(chan int)
+	outCh := make(chan int)
+
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+
+	go func() {
+		defer close(inCh)
+		for i := range 10 {
+			select {
+			case inCh <- i + 1:
+			case <-ctx.Done():
+				return
+			}
+		}
+	}()
+
+	now := time.Now()
+	processParallel(ctx, inCh, outCh, 5)
+
+	for val := range outCh {
+		fmt.Println(val)
 	}
-	sort.Ints(results)
-	for _, num := range results {
-		fmt.Println(num)
-	}
+	fmt.Println(time.Since(now))
 }
 
-func main() {
-	now := time.Now()
-	reader(doubler(writer()))
-	defer func() {
-		fmt.Println(time.Since(now))
+func processParallel(ctx context.Context, inCh <-chan int, outCh chan<- int, workerCount int) {
+	wg := &sync.WaitGroup{}
+	for range workerCount {
+		wg.Add(1)
+		go worker(ctx, inCh, outCh, wg)
+	}
+
+	go func() {
+		wg.Wait()
+		close(outCh)
 	}()
+}
+
+func worker(ctx context.Context, inCh <-chan int, outCh chan<- int, wg *sync.WaitGroup) {
+	defer wg.Done()
+
+	for {
+		select {
+		case val, ok := <-inCh:
+			if !ok {
+				return
+			}
+			select {
+			case ov := <-processData(ctx, val):
+				if ov.err != nil {
+					return
+				}
+				select {
+				case outCh <- ov.val:
+				case <-ctx.Done():
+					return
+				}
+			case <-ctx.Done():
+				return
+			}
+		case <-ctx.Done():
+			return
+		}
+	}
 }
