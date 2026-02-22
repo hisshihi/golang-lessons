@@ -68,6 +68,7 @@ func WorkerSession(ctx context.Context, session <-chan *Session) {
 	}
 }
 
+// monitorSession отслеживает сессию и переключает её в режим работы
 func monitorSession(s *Session) {
 	ticker := time.NewTicker(time.Duration(s.ExitSeconds) * time.Second)
 	defer ticker.Stop()
