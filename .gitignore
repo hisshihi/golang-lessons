@@ -7,3 +7,4 @@ prices.txt
 *.db
 .idea
 golang-lessons
+__debug_bin
