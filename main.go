@@ -2,55 +2,44 @@ package main
 
 import (
 	"context"
+	"errors"
 	"fmt"
-	"log"
 	"math/rand"
 	"time"
 )
 
-func rpcCall(ctx context.Context) (string, error) {
-	duration := time.Duration(rand.Intn(10)+1) * time.Second
-	fmt.Println("duration", duration)
-	timer := time.NewTimer(duration)
-	defer timer.Stop()
-
-	select {
-	case <-timer.C:
-		return "data", nil
-	case <-ctx.Done():
-		return "", fmt.Errorf("rpc error: %w", ctx.Err())
-	}
-}
-
-func callRPCWithTimeout(ctx context.Context, timeout time.Duration) (string, error) {
-	ctx, cancel := context.WithTimeout(ctx, timeout)
+func main() {
+	chanForResp := make(chan resp)
+	ctx := context.Background()
+	ctxWithTimeout, cancel := context.WithTimeout(ctx, time.Second*2)
 	defer cancel()
 
-	type result struct {
-		data string
-		err  error
-	}
-
-	ch := make(chan result, 1)
-	go func() {
-		data, err := rpcCall(ctx)
-		ch <- result{data: data, err: err}
-	}()
-
-	select {
-	case res := <-ch:
-		return res.data, res.err
-	case <-ctx.Done():
-		return "", fmt.Errorf("timeout: %w", ctx.Err())
-	}
+	go RPCCall(ctxWithTimeout, chanForResp)
+	res:= <-chanForResp
+	fmt.Println(res.id, res.err)
 }
 
-func main() {
-	ctx := context.Background()
-	data, err := callRPCWithTimeout(ctx, 5*time.Second)
-	if err != nil {
-		log.Println("Error:", err)
+type resp struct {
+	id  int
+	err error
+}
+
+func RPCCall(ctx context.Context, ch chan<- resp) {
+	duration := rand.Intn(5) + 1
+	fmt.Println("duration:", duration)
+
+	select {
+	case <-ctx.Done():
+		ch <- resp{
+			id:  0,
+			err: errors.New("timeout expired"),
+		}
+		return
+	case <-time.After(time.Second * time.Duration(duration)):
+		ch <- resp{
+			id:  rand.Int(),
+			err: nil,
+		}
 		return
 	}
-	fmt.Println(data)
 }
