@@ -2,44 +2,47 @@ package main
 
 import (
 	"context"
-	"errors"
 	"fmt"
-	"math/rand"
-	"time"
+	"log"
+	"net/http"
+
+	"golang.org/x/sync/errgroup"
 )
 
+var urls = []string{"https://example.com", "https://example.org", "https://example.net"}
+
 func main() {
-	chanForResp := make(chan resp)
 	ctx := context.Background()
-	ctxWithTimeout, cancel := context.WithTimeout(ctx, time.Second*2)
-	defer cancel()
-
-	go RPCCall(ctxWithTimeout, chanForResp)
-	res:= <-chanForResp
-	fmt.Println(res.id, res.err)
-}
-
-type resp struct {
-	id  int
-	err error
-}
-
-func RPCCall(ctx context.Context, ch chan<- resp) {
-	duration := rand.Intn(5) + 1
-	fmt.Println("duration:", duration)
-
-	select {
-	case <-ctx.Done():
-		ch <- resp{
-			id:  0,
-			err: errors.New("timeout expired"),
-		}
-		return
-	case <-time.After(time.Second * time.Duration(duration)):
-		ch <- resp{
-			id:  rand.Int(),
-			err: nil,
-		}
-		return
+	g, qctx := errgroup.WithContext(ctx)
+	g.SetLimit(2)
+	for _, url := range urls {
+		g.Go(func() error {
+			return isAvailable(qctx, url)
+		})
 	}
+
+	if err := g.Wait(); err != nil {
+		log.Fatalf("Some resource is not available: %v", err)
+	} else {
+		log.Println("All resource available")
+	}
+}
+
+func isAvailable(ctx context.Context, url string) error {
+	c := http.Client{}
+	req, err := http.NewRequestWithContext(ctx, "OPTIONS", url, nil)
+	if err != nil {
+		return err
+	}
+
+	resp, err := c.Do(req)
+	if err != nil {
+		return err
+	}
+
+	if resp.StatusCode != http.StatusOK {
+		return fmt.Errorf("wrong status code %d for url %v", resp.StatusCode, url)
+	}
+
+	return nil
 }
