@@ -1,15 +1,16 @@
 package main
 
-type User struct {
-	ID   uint   `json:"id"`
-	Name string `json:"name"`
-}
+import "fmt"
 
-func hello() string {
-	hello := "hello"
-	return hello
+type User struct {
+	ID   uint   `json:"id,omitempty"`
+	Name string `json:"name,omitempty"`
 }
 
 func main() {
-	hello()
+	user := User{
+		ID:   1,
+		Name: "hiss",
+	}
+	fmt.Printf("user: %#v", user)
 }
